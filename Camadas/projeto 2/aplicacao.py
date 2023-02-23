@@ -25,14 +25,14 @@ import random
 #serialName = "/dev/tty.usbmodem1411" # Mac    (variacao de)
 serialName = "COM4"                  # Windows(variacao de)
 
-def randomizador(n):
-    lista = []
-    for i in range(n):
-        valor = random.randint(0,8)
-        lista.append(valor)
-        if len(lista) == 1:
-            lista.append(valor)
-    return lista
+# def randomizador(n):
+#     lista = []
+#     for i in range(n):
+#         valor = random.randint(0,8)
+#         lista.append(valor)
+#         if len(lista) == 1:
+#             lista.append(valor)
+#     return lista
 
 comandos = [b'\x00\x00\x00\x00', b'\x00\x00\xAA\x00', b'\xAA\x00\x00', b'\x00\xAA\x00', b'\x00\x00\xAA', b'\x00\xAA', b'\xAA\x00', b'\x00', b'\xFF']
 
@@ -68,18 +68,18 @@ def main():
         print(f'numero de comandos: {n_random}')
 
 
-        lista = randomizador(n_random)
-        for i in lista:
-            txBuffer = comandos[i]
-            tamanho_tx_buffer = len(txBuffer)
-            tamanho_tx_buffer_bytes = bytes([tamanho_tx_buffer])
-            print(f'enviou o comando {i} com tamanho {np.asarray(tamanho_tx_buffer_bytes)} bytes')
-            com1.sendData(np.asarray(txBuffer))
+        for i in range(n_random):
+            valor = random.randint(0,8)
+            comando = comandos[valor]
+            tamanho_comando = len(comando)
+            comando_bytes = bytes([tamanho_comando])
+            print(f'enviou o comando {valor+1} com tamanho {tamanho_comando} bytes')
+            com1.sendData(np.asarray(comando_bytes))
 
-            time.sleep(1)
-            com1.sendData(np.asarray(lista[i]))
-            print("enviou o byte {}" .format(lista[i]))
-            time.sleep(1)
+            time.sleep(0.5)
+            com1.sendData(np.asarray(comando))
+            print("enviou o byte {}" .format(comando))
+            time.sleep(0.5)
 
         # com1.sendData(np.asarray(txBuffer))  #as array apenas como boa pratica para casos de ter uma outra forma de dados
           
