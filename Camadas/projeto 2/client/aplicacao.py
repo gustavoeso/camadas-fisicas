@@ -25,14 +25,6 @@ import random
 #serialName = "/dev/tty.usbmodem1411" # Mac    (variacao de)
 serialName = "COM4"                  # Windows(variacao de)
 
-# def randomizador(n):
-#     lista = []
-#     for i in range(n):
-#         valor = random.randint(0,8)
-#         lista.append(valor)
-#         if len(lista) == 1:
-#             lista.append(valor)
-#     return lista
 
 comandos = [b'\x00\x00\x00\x00', b'\x00\x00\xAA\x00', b'\xAA\x00\x00', b'\x00\xAA\x00', b'\x00\x00\xAA', b'\x00\xAA', b'\xAA\x00', b'\x00', b'\xFF']
 
@@ -48,60 +40,51 @@ def main():
         com1.enable()
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
         print("Abriu a comunicação")
-                  
-        #aqui você deverá gerar os dados a serem transmitidos. 
-        #seus dados a serem transmitidos são um array bytes a serem transmitidos. Gere esta lista com o 
-        #nome de txBuffer. Esla sempre irá armazenar os dados a serem enviados.
 
-        #faça aqui uma conferência do tamanho do seu txBuffer, ou seja, quantos bytes serão enviados.
+        time.sleep(.2)
+        com1.sendData(b'00')
+        time.sleep(1)
 
-
-        #finalmente vamos transmitir os todos. Para isso usamos a funçao sendData que é um método da camada enlace.
-        #faça um print para avisar que a transmissão vai começar.
-        #tente entender como o método send funciona!
-        #Cuidado! Apenas trasmita arrays de bytes!
 
         n_random = random.randint(10,30)
 
-        txBuffer = bytes([n_random])
-        com1.sendData(np.asarray(txBuffer))
         print(f'numero de comandos: {n_random}')
 
+        lista_comandos = []
 
         for i in range(n_random):
             valor = random.randint(0,8)
             comando = comandos[valor]
-            tamanho_comando = len(comando)
-            comando_bytes = bytes([tamanho_comando])
-            print(f'enviou o comando {valor+1} com tamanho {tamanho_comando} bytes')
-            com1.sendData(np.asarray(comando_bytes))
+            tamanho_comando = bytearray([len(comando)])
 
-            time.sleep(1)
-            com1.sendData(np.asarray(comando))
-            print("enviou o byte {}" .format(comando))
-            time.sleep(1)
 
-        # com1.sendData(np.asarray(txBuffer))  #as array apenas como boa pratica para casos de ter uma outra forma de dados
+            if(i == n_random-1):
+                comando += b'\x11'
 
-        # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
-        # O método não deve estar fincionando quando usado como abaixo. deve estar retornando zero. Tente entender como esse método funciona e faça-o funcionar.
-        # txSize = com1.tx.getStatus()
-        # print('enviou = {}' .format(txSize))
+            lista_comandos.append(tamanho_comando + comando)
+
+        dados = b''.join(lista_comandos)
+        txBuffer = bytearray(dados)
+
+        print(f'tamanho do array = {len(txBuffer)} bytes')
+
+        com1.sendData(np.asarray(txBuffer))
+
+        print('Aguardando resposta do servidor...')
         
-        #Agora vamos iniciar a recepção dos dados. Se algo chegou ao RX, deve estar automaticamente guardado
-        #Observe o que faz a rotina dentro do thread RX
-        #print um aviso de que a recepção vai começar.
-        
-        #Será que todos os bytes enviados estão realmente guardadas? Será que conseguimos verificar?
-        #Veja o que faz a funcao do enlaceRX  getBufferLen
-      
-        #acesso aos bytes recebidos
-        # txLen = len(txBuffer)
-        # rxBuffer, nRx = com1.getData(txLen)
-        # print("recebeu {} bytes" .format(len(rxBuffer)))
-        
-        # for i in range(len(rxBuffer)):
-        #     print("recebeu {}" .format(rxBuffer[i]))
+        tempo_inicial = time.time()
+        while com1.rx.getIsEmpty():
+            if time.time() - tempo_inicial > 5:
+                print('Tempo de resposta do servidor excedido.')
+                com1.disable()
+                break
+
+        else:
+            rxBuffer, nRx = com1.getData(1)
+            print(f'Server recebeu = {rxBuffer[0]} comandos')
+            if rxBuffer[0] != n_random:
+                print('ERRO: Servidor não recebeu todos os comandos.')
+                com1.disable()
 
 
         # Encerra comunicação
@@ -114,7 +97,7 @@ def main():
         print("ops! :-\\")
         print(erro)
         com1.disable()
-        
+
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
