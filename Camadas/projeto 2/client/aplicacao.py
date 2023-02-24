@@ -45,7 +45,6 @@ def main():
         com1.sendData(b'00')
         time.sleep(1)
 
-
         n_random = random.randint(10,30)
 
         print(f'numero de comandos: {n_random}')

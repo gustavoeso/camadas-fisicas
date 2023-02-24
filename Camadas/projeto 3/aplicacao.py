@@ -26,8 +26,6 @@ import random
 serialName = "COM4"                  # Windows(variacao de)
 
 
-comandos = [b'\x00\x00\x00\x00', b'\x00\x00\xAA\x00', b'\xAA\x00\x00', b'\x00\xAA\x00', b'\x00\x00\xAA', b'\x00\xAA', b'\xAA\x00', b'\x00', b'\xFF']
-
 def main():
     try:
         print("Iniciou o main")
@@ -46,46 +44,16 @@ def main():
         time.sleep(1)
 
 
-        n_random = random.randint(10,30)
+        # Head para verificar se o server está vivo
+        Head_handshake = bytearray([0,0,0,0,0,0,0,0,0,0,0,9])
 
-        print(f'numero de comandos: {n_random}')
+        #EOP para verificar se o server está vivo
+        eop = bytearray([1,2,3])
 
-        lista_comandos = []
+        #enviando Head+EOP
+        com1.sendData(Head_handshake + eop)
 
-        for i in range(n_random):
-            valor = random.randint(0,8)
-            comando = comandos[valor]
-            tamanho_comando = bytearray([len(comando)])
-
-
-            if(i == n_random-1):
-                comando += b'\x11'
-
-            lista_comandos.append(tamanho_comando + comando)
-
-        dados = b''.join(lista_comandos)
-        txBuffer = bytearray(dados)
-
-        print(f'tamanho do array = {len(txBuffer)} bytes')
-
-        com1.sendData(np.asarray(txBuffer))
-
-        print('Aguardando resposta do servidor...')
         
-        tempo_inicial = time.time()
-        while com1.rx.getIsEmpty():
-            if time.time() - tempo_inicial > 5:
-                print('Tempo de resposta do servidor excedido.')
-                com1.disable()
-                break
-
-        else:
-            rxBuffer, nRx = com1.getData(1)
-            print(f'Server recebeu = {rxBuffer[0]} comandos')
-            if rxBuffer[0] != n_random:
-                print('ERRO: Servidor não recebeu todos os comandos.')
-                com1.disable()
-
 
         # Encerra comunicação
         print("-------------------------")
