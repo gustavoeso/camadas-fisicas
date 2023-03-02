@@ -102,7 +102,7 @@ def main():
             n_bytes = len(pacote)
             head = bytearray([pacote_atual,n_pacotes,n_bytes,0,0,0,0,0,0,0,0,0])
             com1.sendData(head + pacote + eop)
-
+            print(f'Pacote {pacote_atual} enviado com sucesso. numero de bytes no pacote {n_bytes}')
 
         # Encerra comunicação
         print("-------------------------")
