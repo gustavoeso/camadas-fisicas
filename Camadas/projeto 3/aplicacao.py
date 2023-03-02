@@ -53,7 +53,29 @@ def main():
         #enviando Head+EOP
         com1.sendData(Head_handshake + eop)
 
-        
+        print('Aguardando resposta do servidor...')
+
+        tempo_inicial = time.time()
+        while com1.rx.getIsEmpty():
+            if time.time() - tempo_inicial > 5:
+                resposta = input('Servidor inativo. Tentar novamente? S/N?' + '\n')
+                if resposta == 'S':
+                    com1.sendData(Head_handshake + eop)
+                    print('Aguardando resposta do servidor...')
+                    tempo_inicial = time.time()
+                elif resposta == 'N':
+                    com1.disable()
+                    break
+                else:
+                    ('Resposta inválida. Encerrando comunicação.')
+                    com1.disable()
+
+        else:
+            rxBuffer, nRx = com1.getData(12)
+            print(f'Server recebeu o pacote {rxBuffer}')
+            if rxBuffer != b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\t':
+                print('ERRO: Servidor não recebeu o pacote correto.')
+                com1.disable()
 
         # Encerra comunicação
         print("-------------------------")
