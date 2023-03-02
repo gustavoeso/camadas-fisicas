@@ -69,6 +69,7 @@ def main():
                 else:
                     ('Resposta inválida. Encerrando comunicação.')
                     com1.disable()
+                    break
 
         else:
             rxBuffer, nRx = com1.getData(12)
@@ -76,6 +77,32 @@ def main():
             if rxBuffer != b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\t':
                 print('ERRO: Servidor não recebeu o pacote correto.')
                 com1.disable()
+            else:
+                print('Handshake realizado com sucesso.')
+            
+        imageR = "G:/My Drive/Insper/Semestre 4/camadas-fisicas/Camadas/projeto 3/img/picara.png"
+
+        txBuffer = open(imageR, 'rb').read()
+        print("meu array de bytes tem tamanho {}" .format(len(txBuffer)))
+
+        bytes1 = len(txBuffer)
+        contador = 0
+        pacotes = []
+        while bytes1 >= 50:
+            pacotes.append(txBuffer[contador:contador+50])
+            contador += 50
+            bytes1 -= 50
+        
+        pacotes.append(txBuffer[contador:])
+        
+        pacote_atual = 0
+        for pacote in pacotes:
+            pacote_atual += 1
+            n_pacotes = len(pacotes)
+            n_bytes = len(pacote)
+            head = bytearray([pacote_atual,n_pacotes,n_bytes,0,0,0,0,0,0,0,0,0])
+            com1.sendData(head + pacote + eop)
+
 
         # Encerra comunicação
         print("-------------------------")
