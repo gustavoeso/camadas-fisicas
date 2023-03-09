@@ -100,5 +100,5 @@ def monta_head(h0, h1, h2, h3, h4, h5, h6, h7):
         h7 - Ùltimo pacote recebido com sucesso.
         h8 - h9 - CRC (Por ora deixe em branco. Fará parte do projeto 5).
     '''
-    head = bytes([h1, h2, h3, h4, h5, h6, h7, 0, 0])
+    head = bytes([h0, h1, h2, h3, h4, h5, h6, h7, 0, 0])
     return head
