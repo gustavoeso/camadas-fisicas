@@ -38,13 +38,22 @@ Informações do Head: (12 bytes de tamanho) - Serve para passar informações s
 
 Bytes de EOP: (3 bytes de tamanho) - Serve para indicar o fim da mensagem
 
-    1 byte - b'\x01'
-    2 byte - b'\x02'
-    3 byte - b'\x03'
+    1 byte - b'\xAA'
+    2 byte - b'\xBB'
+    3 byte - b'\xCC'
+    4 byte - b'\xDD'
 
 '''
 
-EOP = bytes([1, 2, 3]) 
+#Tipos de mensagem
+TIPO_1 = b'x01' #chamado do cleinte enviando ao servidor convidando-o para a transmissão
+TIPO_2 = b'x02' #Envio do servidor para o cliente confirmando a transmissão após mensagem do tipo 1
+TIPO_3 = b'x03' #Mensagem de dados
+TIPO_4 = b'x04' #Mensagem do servidor para o cleinte toda vez que uma mensagem tipo 3 é recebida pelo servidor e averiguada
+TIPO_5 = b'x05' #Mensagem de time out
+TIPO_6 = b'x06' #Mensagem de erro
+
+EOP = b'\xAA\xBB\xCC\xDD'
 
 def main():
     try:

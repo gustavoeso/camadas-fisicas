@@ -86,3 +86,19 @@ def trata_pacote(pacote):
     eop = pacote[12+tamanho:]
 
     return head, payload, eop
+
+def monta_head(h0, h1, h2, h3, h4, h5, h6, h7):
+    '''
+        Parametros:
+        h0 - Tipo de mensagem.
+        h1 - Se tipo for 1: número do servidor. Qualquer outro tipo: livre
+        h2 - Livre.
+        h3 - Número total de pacotes do arquivo.
+        h4 - Número do pacote sendo enviado.
+        h5 - Se tipo for handshake: id do arquivo (crie um para cada arquivo). Se tipo for dados: tamanho do payload.
+        h6 - Pacote solicitado para recomeço quando a erro no envio.
+        h7 - Ùltimo pacote recebido com sucesso.
+        h8 - h9 - CRC (Por ora deixe em branco. Fará parte do projeto 5).
+    '''
+    head = bytes([h1, h2, h3, h4, h5, h6, h7, 0, 0])
+    return head
