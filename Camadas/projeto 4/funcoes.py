@@ -4,7 +4,7 @@ import time
 
 HEAD_server_handshake = bytes([9,1,0,0,0,0,0,0,0,0,0,0])
 
-EOP = bytes([1, 2, 3]) 
+EOP = b'\xAA\xBB\xCC\xDD'
 
 def atualiza_tempo(tempo_referencia):
     tempo_atual = time.time()
@@ -49,14 +49,14 @@ def verifica_ordem(recebido, numero_pacote_atual): # Função usada pelo server 
 
 def monta_payload(info):
     tamanho = len(info)
-    pacotes = ceil(tamanho/50) # 50 é o tamanho máximo do payload
+    pacotes = ceil(tamanho/114) # 50 é o tamanho máximo do payload
     payloads = []
     for i in range(pacotes):
         if i == pacotes-1:
-            payload = info[i*50:tamanho]
+            payload = info[i*114:tamanho]
             print(f'tamanho do último payload:{len(payload)}')
         else:
-            payload = info[i*50:(i+1)*50]
+            payload = info[i*114:(i+1)*114]
             print(f'tamanho dos payloads intermediários:{len(payload)}')
         payloads.append(payload)
     return payloads
@@ -97,8 +97,8 @@ def monta_head(h0, h1, h2, h3, h4, h5, h6, h7):
         h4 - Número do pacote sendo enviado.
         h5 - Se tipo for handshake: id do arquivo (crie um para cada arquivo). Se tipo for dados: tamanho do payload.
         h6 - Pacote solicitado para recomeço quando a erro no envio.
-        h7 - Ùltimo pacote recebido com sucesso.
-        h8 - h9 - CRC (Por ora deixe em branco. Fará parte do projeto 5).
+        h7 - Ultimo pacote recebido com sucesso. (1 se foi sucesso 0 se nao)
+        h8:h9 - CRC (Por ora deixe em branco. Fará parte do projeto 5).
     '''
     head = bytes([h0, h1, h2, h3, h4, h5, h6, h7, 0, 0])
     return head

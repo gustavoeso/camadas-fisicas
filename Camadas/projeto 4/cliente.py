@@ -27,16 +27,18 @@ from funcoes import *
 serialName = "COM4"                  # Windows(variacao de)
 
 '''
-Informações do Head: (12 bytes de tamanho) - Serve para passar informações sobre a msg que será enviada
-    1 byte - tipo de mensagem
-    2 byte - Verifica handshake 
-    3 byte - Numero de bytes do payload
-    4 byte - Numero do pacote
-    5 byte - Numero total de pacotes
-    6 byte - Status da transmissão (1 - OK, 0 - Erro)
-    7...12 byte - placeholder
+        Parametros:
+        h0 - Tipo de mensagem.
+        h1 - Se tipo for 1: número do servidor. Qualquer outro tipo: livre
+        h2 - Livre.
+        h3 - Número total de pacotes do arquivo.
+        h4 - Número do pacote sendo enviado.
+        h5 - Se tipo for handshake: id do arquivo (crie um para cada arquivo). Se tipo for dados: tamanho do payload.
+        h6 - Pacote solicitado para recomeço quando a erro no envio.
+        h7 - Ultimo pacote recebido com sucesso. (1 se foi sucesso 0 se nao)
+        h8:h9 - CRC (Por ora deixe em branco. Fará parte do projeto 5).
 
-Bytes de EOP: (3 bytes de tamanho) - Serve para indicar o fim da mensagem
+Bytes de EOP: (4 bytes de tamanho) - Serve para indicar o fim da mensagem
 
     1 byte - b'\xAA'
     2 byte - b'\xBB'
@@ -46,14 +48,18 @@ Bytes de EOP: (3 bytes de tamanho) - Serve para indicar o fim da mensagem
 '''
 
 #Tipos de mensagem
-TIPO_1 = b'x01' #chamado do cleinte enviando ao servidor convidando-o para a transmissão
-TIPO_2 = b'x02' #Envio do servidor para o cliente confirmando a transmissão após mensagem do tipo 1
-TIPO_3 = b'x03' #Mensagem de dados
-TIPO_4 = b'x04' #Mensagem do servidor para o cleinte toda vez que uma mensagem tipo 3 é recebida pelo servidor e averiguada
-TIPO_5 = b'x05' #Mensagem de time out
-TIPO_6 = b'x06' #Mensagem de erro
+TIPO_1 = 1 #chamado do cleinte enviando ao servidor convidando-o para a transmissão
+TIPO_2 = 2 #Envio do servidor para o cliente confirmando a transmissão após mensagem do tipo 1
+TIPO_3 = 3 #Mensagem de dados
+TIPO_4 = 4 #Mensagem do servidor para o cleinte toda vez que uma mensagem tipo 3 é recebida pelo servidor e averiguada
+TIPO_5 = 5 #Mensagem de time out
+TIPO_6 = 6 #Mensagem de erro
 
 EOP = b'\xAA\xBB\xCC\xDD'
+
+AQRUIVO = 'client1.txt'
+ARQUIVO_ID = 1
+SERVER_ID = 1
 
 def main():
     try:
@@ -67,10 +73,11 @@ def main():
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
         print("Abriu a comunicação")
 
-        img = 'Projeto3/img/picara.jpg'
+        img = 'Projeto4/img/picara.jpg'
         imgLida = open(img, 'rb').read()
         lista_payload = monta_payload(imgLida) # Lista de payloads da imagem divida
-        HEAD_handshake = bytes([8,0,0,0,len(lista_payload),0,0,0,0,0,0,0]) # Head para handshake
+        HEAD_handshake = monta_head(TIPO_1, SERVER_ID, 0, len(lista_payload), 0, ARQUIVO_ID, 0, 0)
+        # HEAD_handshake = bytes([TIPO_1,1,0,0,len(lista_payload),0,0,0,0,0,0,0]) # Head para handshake
         client_handshake = np.asarray(HEAD_handshake + EOP)
 
         # Enviando bit de sacrifício
@@ -100,18 +107,30 @@ def main():
                     com1.disable(); return
             else:
                 server_handshake, _ = com1.getData(15)
-                is_server_handshake_correct = verifica_handshake(server_handshake, True)
-                if is_server_handshake_correct == False:
+                # is_server_handshake_correct = verifica_handshake(server_handshake, True)
+                if server_handshake != bytes([TIPO_2,1,0,0,len(lista_payload),0,0,0,0,0,0,0]): 
                     print('Handshake incorreto. Encerrando conexão.')
                     com1.disable(); return
-                if is_server_handshake_correct == True:
+                if server_handshake == bytes([TIPO_2,1,0,0,len(lista_payload),0,0,0,0,0,0,0]):
                     print('Handshake server está correto.')
                     break
                 
-
+        '''
+        Parametros:
+        h0 - Tipo de mensagem.
+        h1 - Se tipo for 1: número do servidor. Qualquer outro tipo: livre
+        h2 - Livre.
+        h3 - Número total de pacotes do arquivo.
+        h4 - Número do pacote sendo enviado.
+        h5 - Se tipo for handshake: id do arquivo (crie um para cada arquivo). Se tipo for dados: tamanho do payload.
+        h6 - Pacote solicitado para recomeço quando a erro no envio.
+        h7 - Ultimo pacote recebido com sucesso.
+        h8:h9 - CRC (Por ora deixe em branco. Fará parte do projeto 5).
+        '''
+        
         pacote_atual = 1
         for payload in lista_payload:
-            HEAD_conteudo_cliente = bytes([3,0,len(payload), pacote_atual, len(lista_payload),0,0,0,0,0,0,0])
+            HEAD_conteudo_cliente = monta_head(TIPO_3, 0, 0, len(lista_payload), pacote_atual, len(payload), pacote_atual, pacote_atual-1)
             pacote = HEAD_conteudo_cliente + payload + EOP
             com1.sendData(np.asarray(pacote))
             pacote_atual += 1
