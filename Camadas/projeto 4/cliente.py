@@ -23,8 +23,8 @@ from funcoes import *
 
 #use uma das 3 opcoes para atribuir à variável a porta usada
 #serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
-#serialName = "/dev/tty.usbmodem1411" # Mac    (variacao de)
-serialName = "COM4"                  # Windows(variacao de)
+#serialName = "/dev/tty.usbmodem1411"  # Mac    (variacao de)
+serialName = "COM4"                    # Windows(variacao de)
 
 '''
     Parametros:
@@ -77,7 +77,6 @@ def main():
         imgLida = open(img, 'rb').read()
         lista_payload = monta_payload(imgLida) # Lista de payloads da imagem divida
         HEAD_handshake = monta_head(TIPO_1, SERVER_ID, 0, len(lista_payload), 0, ARQUIVO_ID, 0, 0)
-        HEAD_handshake_return = monta_head(TIPO_2, 0, 0, 0, 0, 0, 0, 0)
         client_handshake = np.asarray(HEAD_handshake + EOP)
 
         # Enviando bit de sacrifício
@@ -106,12 +105,12 @@ def main():
                     print('Servidor Inativo. Encerrando conexão.')
                     com1.disable(); return
             else:
-                server_handshake, _ = com1.getData(15)
-                # is_server_handshake_correct = verifica_handshake(server_handshake, True)
-                if server_handshake != HEAD_handshake_return: 
+                server_handshake, _ = com1.getData(14)
+                tipo_mensagem = server_handshake[0]
+                if server_handshake != b'x02': 
                     print('Handshake incorreto. Encerrando conexão.')
                     com1.disable(); return
-                if server_handshake == HEAD_handshake_return:
+                if server_handshake == b'x02':
                     print('Handshake server está correto.')
                     break
 
@@ -134,7 +133,7 @@ def main():
             pacote = HEAD_conteudo_cliente + payload + EOP
             com1.sendData(np.asarray(pacote))
             pacote_atual += 1
-
+            
             feedback_client, _ = com1.getData(1)
             time.sleep(0.1)
             if feedback_client == 1:
@@ -145,7 +144,7 @@ def main():
             com1.rx.clearBuffer()
             time.sleep(0.1)
         
-        HEAD_server_final, _ = com1.getData(12) # Recebendo o head do servidor
+        HEAD_server_final, _ = com1.getData(14) # Recebendo o head do servidor
         is_trasmission_ok = (HEAD_server_final[4] == 1)
         eop_server_final, _ = com1.getData(3) # Recebendo o EOP do servidor
         pacote_server_final = HEAD_server_final + eop_server_final
