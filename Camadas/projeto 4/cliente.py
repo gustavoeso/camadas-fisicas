@@ -27,16 +27,16 @@ from funcoes import *
 serialName = "COM4"                  # Windows(variacao de)
 
 '''
-        Parametros:
-        h0 - Tipo de mensagem.
-        h1 - Se tipo for 1: número do servidor. Qualquer outro tipo: livre
-        h2 - Livre.
-        h3 - Número total de pacotes do arquivo.
-        h4 - Número do pacote sendo enviado.
-        h5 - Se tipo for handshake: id do arquivo (crie um para cada arquivo). Se tipo for dados: tamanho do payload.
-        h6 - Pacote solicitado para recomeço quando a erro no envio.
-        h7 - Ultimo pacote recebido com sucesso. (1 se foi sucesso 0 se nao)
-        h8:h9 - CRC (Por ora deixe em branco. Fará parte do projeto 5).
+    Parametros:
+    h0 - Tipo de mensagem.
+    h1 - Se tipo for 1: número do servidor. Qualquer outro tipo: livre
+    h2 - Livre.
+    h3 - Número total de pacotes do arquivo.
+    h4 - Número do pacote sendo enviado.
+    h5 - Se tipo for handshake: id do arquivo (crie um para cada arquivo). Se tipo for dados: tamanho do payload.
+    h6 - Pacote solicitado para recomeço quando a erro no envio.
+    h7 - Ultimo pacote recebido com sucesso. (1 se foi sucesso 0 se nao)
+    h8:h9 - CRC (Por ora deixe em branco. Fará parte do projeto 5).
 
 Bytes de EOP: (4 bytes de tamanho) - Serve para indicar o fim da mensagem
 
@@ -77,7 +77,7 @@ def main():
         imgLida = open(img, 'rb').read()
         lista_payload = monta_payload(imgLida) # Lista de payloads da imagem divida
         HEAD_handshake = monta_head(TIPO_1, SERVER_ID, 0, len(lista_payload), 0, ARQUIVO_ID, 0, 0)
-        # HEAD_handshake = bytes([TIPO_1,1,0,0,len(lista_payload),0,0,0,0,0,0,0]) # Head para handshake
+        HEAD_handshake_return = monta_head(TIPO_2, 0, 0, 0, 0, 0, 0, 0)
         client_handshake = np.asarray(HEAD_handshake + EOP)
 
         # Enviando bit de sacrifício
@@ -108,13 +108,13 @@ def main():
             else:
                 server_handshake, _ = com1.getData(15)
                 # is_server_handshake_correct = verifica_handshake(server_handshake, True)
-                if server_handshake != bytes([TIPO_2,1,0,0,len(lista_payload),0,0,0,0,0,0,0]): 
+                if server_handshake != HEAD_handshake_return: 
                     print('Handshake incorreto. Encerrando conexão.')
                     com1.disable(); return
-                if server_handshake == bytes([TIPO_2,1,0,0,len(lista_payload),0,0,0,0,0,0,0]):
+                if server_handshake == HEAD_handshake_return:
                     print('Handshake server está correto.')
                     break
-                
+
         '''
         Parametros:
         h0 - Tipo de mensagem.
@@ -127,7 +127,7 @@ def main():
         h7 - Ultimo pacote recebido com sucesso.
         h8:h9 - CRC (Por ora deixe em branco. Fará parte do projeto 5).
         '''
-        
+    
         pacote_atual = 1
         for payload in lista_payload:
             HEAD_conteudo_cliente = monta_head(TIPO_3, 0, 0, len(lista_payload), pacote_atual, len(payload), pacote_atual, pacote_atual-1)
