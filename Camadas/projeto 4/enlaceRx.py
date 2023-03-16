@@ -75,7 +75,7 @@ class RX(object):
             tempo_atual = time.time()
             if (tempo_atual - timer2 > 20):
                 print('Timeout, o servidor não respondeu a tempo')
-            elif (tempo_atual - timer1 > 2):
+            elif (tempo_atual - timer1 > 5):
                 raise Timer1Error()
 
         return(self.getBuffer(size))
