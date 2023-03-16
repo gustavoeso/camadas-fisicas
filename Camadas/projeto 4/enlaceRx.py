@@ -13,6 +13,8 @@ import time
 # Threads
 import threading
 
+from timer_error import *
+
 # Class
 class RX(object):
   
@@ -67,13 +69,21 @@ class RX(object):
         self.threadResume()
         return(b)
 
-    def getNData(self, size):
+    def getNData(self, size, timer1, timer2):
         while(self.getBufferLen() < size):
-            time.sleep(0.05)                 
-        return(self.getBuffer(size))
+            time.sleep(0.05)        
+            tempo_atual = time.time()
+            if (tempo_atual - timer2 > 20):
+                print('Timeout, o servidor não respondeu a tempo')
+            elif (tempo_atual - timer1 > 2):
+                raise Timer1Error()
 
+        return(self.getBuffer(size))
+    
+    def getNDataNormal(self, size):
+            while(self.getBufferLen() < size):
+                time.sleep(0.05)                 
+            return(self.getBuffer(size))
 
     def clearBuffer(self):
         self.buffer = b""
-
-

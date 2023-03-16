@@ -1,6 +1,7 @@
 import numpy as np
 from math import ceil
 import time
+from datetime import datetime
 
 HEAD_server_handshake = bytes([9,1,0,0,0,0,0,0,0,0,0,0])
 
@@ -102,3 +103,24 @@ def monta_head(h0, h1, h2, h3, h4, h5, h6, h7):
     '''
     head = bytes([h0, h1, h2, h3, h4, h5, h6, h7, 0, 0])
     return head
+
+def log_write(arquivo:str, operacao:str, tipo:int, tamanho:int, pacote_enviado:int=None, total_pacotes:int=None):
+    '''
+    Função para escrever os logs em um arquivo txt.
+
+    Parâmetros:
+        arquivo: Nome do arquivo em que o log será escrito.
+        op : String indicando a operação que está sendo feita (Envio, recebimento ou reenvio)
+        tipo : Número do tipo do pacote.
+        tamanho_bytes : Número do tamanho do payload da mensagem.
+        pacote_enviado : Número do pacote (é incrementado durante a transmissão).
+        total_pacotes : Número total de pacotes que serão enviados na transmissão que está sendo realizada.
+    '''
+    if not total_pacotes:
+        total_pacotes = ''
+    if not pacote_enviado:
+        pacote_enviado = ''
+    
+    with open(f'logs/{arquivo}.txt', 'a') as f:
+        conteudo = f'{datetime.now()} /{operacao}/Tipo:{tipo}/Tamanho:{tamanho}/Nºpacote:{pacote_enviado}/TotalPacotes:{total_pacotes} \n'
+        f.write(conteudo)
