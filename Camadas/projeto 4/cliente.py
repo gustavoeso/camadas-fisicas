@@ -118,24 +118,46 @@ def main():
                 
 
             pacote_atual = 1
-            for payload in lista_payload:
-                HEAD_conteudo_cliente = monta_head(TIPO_3, 0, 0, len(lista_payload), pacote_atual, len(payload), pacote_atual, pacote_atual-1)
-                pacote = HEAD_conteudo_cliente + payload + EOP
+            while pacote_atual <= len(lista_payload):
+                HEAD_conteudo_cliente = monta_head(TIPO_3, 0, 0, len(lista_payload), pacote_atual, len(lista_payload[pacote_atual]), pacote_atual, pacote_atual-1)
+                pacote = HEAD_conteudo_cliente + lista_payload[pacote_atual] + EOP
                 com1.sendData(np.asarray(pacote))
                 pacote_atual += 1
-                
-                feedback_client, _ = com1.getDataNormal(1)
+                try:
+                    feedback_client, _ = com1.getDataNormal(10)
+                    resposta_servidor_tipo4 = feedback_client[0]
 
-                tempo_inicial = time.time()
-                if time.time() - tempo_inicial > 5:
-                    resposta = print('Servidor inativo, reenviando ' + '\n')
-                    com1.sendData(np.asarray(pacote))
-                    
+                except Exception:
                     tempo_inicial = time.time()
                     if time.time() - tempo_inicial > 5:
-                        print('Servidor inativo, desativando comunicação.')
-                        com1.disable(); return
+                        resposta = print('Servidor inativo, reenviando ' + '\n')
+                        com1.sendData(np.asarray(pacote))
+                        try:
+                            feedback_client, _ = com1.getDataNormal(10)
+                            resposta_servidor_tipo4 = feedback_client[0]
+                        except Exception:
+                            tempo_inicial = time.time()
+                            if time.time() - tempo_inicial > 20:
+                                HEAD_tipo5 = monta_head(TIPO_5, 0, 0, 0, 0, 0, 0, 0)
+                                com1.sendData(HEAD_tipo5)
+                                print('Tmeout, servidor inativo, desativando comunicação.')
+                                com1.disable(); return
+                            else:
+                                com1.getDataNormal(10)
+                                resposta_servidor_tipo6 = feedback_client[0]
+                                if resposta_servidor_tipo6 == b'\x06':
+                                    numero_pacote_servidor = feedback_client[6]
+                                    pacote_atual = numero_pacote_servidor
+                                    com1.sendData(np.asarray(pacote))
+                                else:
+                                    com1.sendData(np.asarray(pacote))
 
+
+                if resposta_servidor_tipo4 == b'\x04':
+                    print(f'Pacote {pacote_atual} enviado com sucesso.')
+                elif resposta_servidor_tipo4 == b'\x05':
+                    print(f'Timeout no pacote {pacote_atual}, reenvie o pacote.')
+                    com1.disable(); return
 
                 time.sleep(0.1)
                 if feedback_client == 1:
