@@ -81,21 +81,22 @@ def main():
 
         while True:
             try:
-                # Enviando handshake
-                com1.sendData(client_handshake)
-                time.sleep(5)
-                print('Handshake enviado.')
-                loop_handshake = True
-                inicia = True
+                inicia = False
+                # inicia = True
                 
-                if inicia:
-                    log_write(AQRUIVO_LOG, 'inicia', 1, 14)
-                else:
-                    inicia = True
-                    log_write(AQRUIVO_LOG, 'inicia', 1, 14)
+                # if inicia:
+                #     log_write(AQRUIVO_LOG, 'inicia', 1, 14)
+                # else:
+                #     inicia = True
+                #     log_write(AQRUIVO_LOG, 'inicia', 1, 14)
                     
                 # Recebendo a resposta do servidor
-                while loop_handshake:
+                while not inicia:
+                    # Enviando handshake
+                    com1.sendData(client_handshake)
+                    print('Handshake enviado.')
+                    time.sleep(5)
+
                     HEAD_server, _ = com1.getData(10, timer1, timer2)
                     EOP_server_handshake, _ = com1.getData(4, timer1, timer2)
                     print('Head do server recebido.')
@@ -104,10 +105,10 @@ def main():
 
                     if resposta_servidor == b'\x02' and EOP_server_handshake == EOP:
                         print(f'Handshake correto, a resposta do server e valida.')
-                        loop_handshake = False
+                        inicia = True
                     else:
-                        com1.sendData(client_handshake)
                         print(f'Handshake incorreto, a resposta do server e invalida.')
+                        inicia = False
 
 
                 pacote_atual = 1
