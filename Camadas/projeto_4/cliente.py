@@ -57,7 +57,7 @@ TIPO_6 = 6 #Mensagem de erro
 
 EOP = b'\xAA\xBB\xCC\xDD'
 
-AQRUIVO_LOG = 'client1.txt'
+AQRUIVO_LOG = 'cliente3.txt'
 ARQUIVO_ID = 1
 SERVER_ID = 1
 
@@ -107,7 +107,6 @@ def main():
 
         pacote_atual = 1
         reenvio = False
-        print('teste')
         while pacote_atual <= len(lista_payload):
             try:
                 tamanho_payload = len(lista_payload[pacote_atual - 1])
@@ -117,10 +116,6 @@ def main():
                 com1.sendData(np.asarray(pacote))
                 log_write(AQRUIVO_LOG, 'envio', 3, tamanho_payload + 14, pacote_atual, tamanho_total)
                 time.sleep(0.5)
-                print('------------------------')
-                # print(f'Pacote {pacote_atual} enviado.')
-                print(tamanho_total, pacote_atual, tamanho_payload)
-                print('------------------------')
 
                 timer1 = time.time()
                 if not reenvio:

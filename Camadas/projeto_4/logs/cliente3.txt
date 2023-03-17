@@ -1,0 +1,13 @@
+2023-03-17 17:28:51.602377 /envio/Tipo:1/Tamanho:14/Num_pacote:/TotalPacotes: 
+2023-03-17 17:28:56.704559 /recebimento/Tipo:2/Tamanho:14/Num_pacote:/TotalPacotes: 
+2023-03-17 17:28:56.817116 /envio/Tipo:3/Tamanho:128/Num_pacote:1/TotalPacotes:16 
+2023-03-17 17:28:57.412268 /recebimento/Tipo:4/Tamanho:14/Num_pacote:/TotalPacotes: 
+2023-03-17 17:28:57.479270 /envio/Tipo:3/Tamanho:128/Num_pacote:2/TotalPacotes:16 
+2023-03-17 17:28:58.168756 /recebimento/Tipo:4/Tamanho:14/Num_pacote:/TotalPacotes: 
+2023-03-17 17:28:58.232529 /envio/Tipo:3/Tamanho:128/Num_pacote:3/TotalPacotes:16 
+2023-03-17 17:28:59.934507 /recebimento/Tipo:4/Tamanho:14/Num_pacote:/TotalPacotes: 
+2023-03-17 17:28:59.997509 /envio/Tipo:3/Tamanho:128/Num_pacote:4/TotalPacotes:16 
+2023-03-17 17:29:05.511476 /envio/Tipo:3/Tamanho:128/Num_pacote:4/TotalPacotes:16 
+2023-03-17 17:29:11.063811 /envio/Tipo:3/Tamanho:128/Num_pacote:4/TotalPacotes:16 
+2023-03-17 17:29:16.625811 /envio/Tipo:3/Tamanho:128/Num_pacote:4/TotalPacotes:16 
+2023-03-17 17:29:20.623460 /envio/Tipo:5/Tamanho:14/Num_pacote:/TotalPacotes: 
