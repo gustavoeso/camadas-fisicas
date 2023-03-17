@@ -110,137 +110,62 @@ def main():
                     else:
                         com1.sendData(client_handshake)
                         print(f'Handshake incorreto, a resposta do server e invalida.')
+                
 
+                pacote_atual = 1
+                reenvio = False
+                while pacote_atual <= len(lista_payload):
+                    try:    
+                        tamanho_pacote = len(lista_payload[pacote_atual])
+                        tamanho_payload = len(lista_payload)
+                        HEAD_conteudo_cliente = monta_head(TIPO_3, 0, 0, tamanho_payload, pacote_atual, tamanho_pacote, pacote_atual, pacote_atual-1)
+                        pacote = HEAD_conteudo_cliente + lista_payload[pacote_atual] + EOP
+                        com1.sendData(np.asarray(pacote))
+                        print(f'Pacote {pacote_atual} enviado.')
+
+                        timer1 = time.time()
+                        if not reenvio:
+                            timer2 = time.time()
+
+
+                        feedback_client, _ = com1.getData(10, timer1, timer2)
+                        resposta_servidor_tipo = feedback_client[0]
+
+                        if resposta_servidor_tipo == b'\x04':
+                            print(f'Pacote {pacote_atual} recebido com sucesso.')
+                            pacote_atual += 1
+                            reenvio = False
+
+
+                        elif resposta_servidor_tipo == b'\x06':
+                            pacote_servidor = feedback_client[6]
+                            print(f' numero do pacote incorreto, pacote correto de acordo com o servidor: {pacote_servidor}')
+                            pacote_atual = pacote_servidor
+                            com1.rx.clearBuffer()
+                            reenvio = False
+
+                    except Timer1Error:
+                        reenvio = True
+
+                    except Timer2Error:
+                        print('Time out, servidor inativo.')
+                        HEAD_tipo5 = monta_head(TIPO_5, 0, 0, 0, 0, 0, 0, 0)
+                        pacote_tipo5 = HEAD_tipo5 + EOP
+                        com1.sendData(np.asarray(pacote_tipo5))
+                        com1.disable(); return
+            
+            
             except Exception as erro:
                 print("ops! :-\\")
                 print(erro)
                 com1.disable()
-                
-
-            pacote_atual = 1
-            while pacote_atual <= len(lista_payload):
-                HEAD_conteudo_cliente = monta_head(TIPO_3, 0, 0, len(lista_payload), pacote_atual, len(lista_payload[pacote_atual]), pacote_atual, pacote_atual-1)
-                pacote = HEAD_conteudo_cliente + lista_payload[pacote_atual] + EOP
-                com1.sendData(np.asarray(pacote))
-                timer1 = time.time()
-                timer2 = time.time()
-
-                feedback_client, _ = com1.getData(10, timer1, timer2)
-                resposta_servidor_tipo4 = feedback_client[0]
-
-                if resposta_servidor_tipo4 == b'\x04':
-                    print('Pacote recebido com sucesso.')
-                    pacote_atual += 1
-                else:
-                    print('Pacote não recebido com sucesso.')
-                    if timer1 > 5:
-                        com1.sendData(np.asarray(pacote))
-                        timer1 = time.time()
-
-                    elif timer2 > 20:
-                        HEAD_tipo5 = monta_head(TIPO_5, 0, 0, 0, 0, 0, 0, 0)
-                        pacote_tipo5 = HEAD_tipo5 + EOP
-                        com1.sendData(np.asarray(pacote_tipo5))
-                        print('Time out, servidor inativo.')
-                        break
-                    
-                    else:
-                    #estou me perdendo aqui
-                        if resposta_servidor_tipo4 == b'\x06':
-                            numero_pacote_servidor = feedback_client[6]
-                            pacote_atual = numero_pacote_servidor
-                            com1.sendData(np.asarray(pacote))
-                            timer1 = time.time()
-                            timer2 = time.time()
-
-                
-                # try:
-                #     feedback_client, _ = com1.getDataNormal(10)
-                #     resposta_servidor_tipo4 = feedback_client[0]
-
-                # except Exception:
-                #     tempo_inicial = time.time()
-                #     if time.time() - tempo_inicial > 5:
-                #         resposta = print('Servidor inativo, reenviando ' + '\n')
-                #         com1.sendData(np.asarray(pacote))
-                #         try:
-                #             feedback_client, _ = com1.getDataNormal(10)
-                #             resposta_servidor_tipo4 = feedback_client[0]
-                #         except Exception:
-                #             tempo_inicial = time.time()
-                #             if time.time() - tempo_inicial > 20:
-                #                 HEAD_tipo5 = monta_head(TIPO_5, 0, 0, 0, 0, 0, 0, 0)
-                #                 com1.sendData(HEAD_tipo5)
-                #                 print('Tmeout, servidor inativo, desativando comunicação.')
-                #                 com1.disable(); return
-                #             else:
-                #                 com1.getDataNormal(10)
-                #                 resposta_servidor_tipo6 = feedback_client[0]
-                #                 if resposta_servidor_tipo6 == b'\x06':
-                #                     numero_pacote_servidor = feedback_client[6]
-                #                     pacote_atual = numero_pacote_servidor
-                #                     com1.sendData(np.asarray(pacote))
-                #                 else:
-                #                     com1.sendData(np.asarray(pacote))
-
-
-                # if resposta_servidor_tipo4 == b'\x04':
-                #     print(f'Pacote {pacote_atual} enviado com sucesso.')
-                # elif resposta_servidor_tipo4 == b'\x05':
-                #     print(f'Timeout no pacote {pacote_atual}, reenvie o pacote.')
-                #     com1.disable(); return
-
-                time.sleep(0.1)
-                if feedback_client == 1:
-                    print(f'Tamanho do payload incorreto {pacote_atual}, reenvie o pacote.')
-                    com1.disable(); return
-                if feedback_client == 2:
-                    print(f'Pacote {pacote_atual} enviado com sucesso.')
-                com1.rx.clearBuffer()
-                time.sleep(0.1)
             
-            HEAD_server_final, _ = com1.getData(14) # Recebendo o head do servidor
-            is_trasmission_ok = (HEAD_server_final[4] == 1)
-            eop_server_final, _ = com1.getData(3) # Recebendo o EOP do servidor
-            pacote_server_final = HEAD_server_final + eop_server_final
-            is_eop_server_final_correct = verifica_eop(HEAD_server_final, pacote_server_final)
 
-            if not is_trasmission_ok:
-                print('Erro no envio de pacotes. Encerrando conexão.')
-            if is_trasmission_ok and is_eop_server_final_correct:
-                print('Transmissão finalizada com sucesso.')
-            
             print('-----------------------------------------')
             print('Comunicação Encerrada')
             print('-----------------------------------------')
             com1.disable()
 
-
-                # com1.rx.clearBuffer()
-                # tempo_agora = time.time()
-                # while (com1.rx.getIsEmpty()) and (atualiza_tempo(tempo_agora) < 5):
-                #     pass
-                # if com1.rx.getIsEmpty():
-                #     try_connection = str(input('Servidor Inativo. Tentar novamente? (S/N) ')).upper()
-                #     if try_connection == 'S':
-                #         com1.sendData(b'00') # Enviando bit de sacrifício
-                #         time.sleep(0.1)
-                #         com1.sendData(client_handshake) # Enviando handshake
-                #         time.sleep(0.1)
-                #     if try_connection == 'N':
-                #         print('Servidor Inativo. Encerrando conexão.')
-                #         com1.disable(); return
-                # else:
-                #     server_handshake, _ = com1.getData(14)
-                #     tipo_mensagem = server_handshake[0]
-                #     if server_handshake != b'x02': 
-                #         print('Handshake incorreto. Encerrando conexão.')
-                #         com1.disable(); return
-                #     if server_handshake == b'x02':
-                #         print('Handshake server está correto.')
-                #         break
-    
-        # Condições para encerrar a conexão
 
     except Exception as erro:
         print("ops! :-\\")
