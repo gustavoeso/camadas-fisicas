@@ -83,18 +83,16 @@ def main():
             try:
                 # Enviando handshake
                 com1.sendData(client_handshake)
-                time.sleep(0.1)
+                time.sleep(5)
                 print('Handshake enviado.')
                 loop_handshake = True
-                reenvio = False
+                inicia = True
                 
-                timer1 = time.time()
-                if not reenvio:
-                    log_write(AQRUIVO_LOG, 'envio', 1, 14)
-                    timer2 = time.time()
+                if inicia:
+                    log_write(AQRUIVO_LOG, 'inicia', 1, 14)
                 else:
-                    reenvio = False
-                    log_write(AQRUIVO_LOG, 'reenvio', 1, 14)
+                    inicia = True
+                    log_write(AQRUIVO_LOG, 'inicia', 1, 14)
                     
                 # Recebendo a resposta do servidor
                 while loop_handshake:
@@ -110,7 +108,7 @@ def main():
                     else:
                         com1.sendData(client_handshake)
                         print(f'Handshake incorreto, a resposta do server e invalida.')
-                
+
 
                 pacote_atual = 1
                 reenvio = False
