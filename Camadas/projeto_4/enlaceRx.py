@@ -74,7 +74,7 @@ class RX(object):
             time.sleep(0.05)        
             tempo_atual = time.time()
             if (tempo_atual - timer2 > 20):
-                print('Timeout, o servidor não respondeu a tempo')
+                raise Timer2Error()
             elif (tempo_atual - timer1 > 5):
                 raise Timer1Error()
 
@@ -82,7 +82,7 @@ class RX(object):
     
     def getNDataNormal(self, size):
             while(self.getBufferLen() < size):
-                time.sleep(0.05)                 
+                time.sleep(0.05)
             return(self.getBuffer(size))
 
     def clearBuffer(self):

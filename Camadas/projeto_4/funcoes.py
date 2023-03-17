@@ -121,6 +121,6 @@ def log_write(arquivo:str, operacao:str, tipo:int, tamanho:int, pacote_enviado:i
     if not pacote_enviado:
         pacote_enviado = ''
     
-    with open(f'logs/{arquivo}.txt', 'a') as f:
-        conteudo = f'{datetime.now()} /{operacao}/Tipo:{tipo}/Tamanho:{tamanho}/Nºpacote:{pacote_enviado}/TotalPacotes:{total_pacotes} \n'
+    with open(f'projeto_4/logs/{arquivo}', 'a') as f:
+        conteudo = f'{datetime.now()} /{operacao}/Tipo:{tipo}/Tamanho:{tamanho}/Num_pacote:{pacote_enviado}/TotalPacotes:{total_pacotes} \n'
         f.write(conteudo)
