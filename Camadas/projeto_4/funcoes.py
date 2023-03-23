@@ -2,7 +2,7 @@ import numpy as np
 from math import ceil
 import time
 from datetime import datetime
-from crccheck import Crc16
+from crccheck.crc import Crc16
 
 
 def monta_payload(info):
