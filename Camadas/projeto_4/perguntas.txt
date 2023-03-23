@@ -1,2 +1,0 @@
-1. Precisa de timeout no handshake?
-2. Conferir se codigo está correto pegando do luca no repo dele
