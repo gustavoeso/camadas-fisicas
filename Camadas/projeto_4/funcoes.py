@@ -51,7 +51,7 @@ def monta_head(h0, h1, h2, h3, h4, h5, h6, h7, payload):
         h8:h9 - CRC (Por ora deixe em branco. Fará parte do projeto 5).
     '''
 
-    crc = Crc16.calc(payload)
+    crc = Crc16().calc(payload)
     crc = int.to_bytes(crc, 2, byteorder='big')
     crc1 = crc[0]
     crc2 = crc[1]
