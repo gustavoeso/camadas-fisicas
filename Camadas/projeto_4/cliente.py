@@ -15,6 +15,7 @@ import time
 import numpy as np
 from funcoes import *
 from timer_error import *
+from crccheck import *
 
 # voce deverá descomentar e configurar a porta com através da qual ira fazer comunicaçao
 #   para saber a sua porta, execute no terminal :
@@ -71,7 +72,7 @@ def main():
         img = 'projeto_4\img\picara.jpg'
         imgLida = open(img, 'rb').read()
         lista_payload = monta_payload(imgLida) # Lista de payloads da imagem divida
-        HEAD_handshake = monta_head(TIPO_1, SERVER_ID, 0, len(lista_payload), 0, ARQUIVO_ID, 0, 0)
+        HEAD_handshake = monta_head_handshake(TIPO_1, SERVER_ID, 0, len(lista_payload), 0, ARQUIVO_ID, 0, 0)
         client_handshake = np.asarray(HEAD_handshake + EOP)
 
         # Enviando bit de sacrifício
@@ -111,8 +112,9 @@ def main():
             try:
                 tamanho_payload = len(lista_payload[pacote_atual - 1])
                 tamanho_total = len(lista_payload)
-                HEAD_conteudo_cliente = monta_head(TIPO_3, 0, 0, tamanho_total, pacote_atual, tamanho_payload, pacote_atual, pacote_atual-1)
-                pacote = HEAD_conteudo_cliente + lista_payload[pacote_atual-1] + EOP
+                payload_atual = lista_payload[pacote_atual-1]
+                HEAD_conteudo_cliente = monta_head(TIPO_3, 0, 0, tamanho_total, pacote_atual, tamanho_payload, pacote_atual, pacote_atual-1, payload_atual)
+                pacote = HEAD_conteudo_cliente + payload_atual + EOP
                 com1.sendData(np.asarray(pacote))
                 log_write(AQRUIVO_LOG, 'envio', 3, tamanho_payload + 14, pacote_atual, tamanho_total)
                 time.sleep(0.5)
