@@ -65,7 +65,7 @@ def main():
     # "min_dist" é relatico tolerancia. Ele determina quao próximos 2 picos identificados podem estar, ou seja, se a funcao indentificar um pico na posicao 200, por exemplo, só identificara outro a partir do 200+min_dis. Isso evita que varios picos sejam identificados em torno do 200, uma vez que todos sejam provavelmente resultado de pequenas variações de uma unica frequencia a ser identificada.
     # Comece com os valores:
     # printe os picos encontrados!
-    index = peakutils.indexes(yf, thres=0.1, min_dist=25)
+    index = peakutils.indexes(yf, thres=0.09, min_dist=25)
 
     print(f"index de picos {index}")  # yf é o resultado da transformada de fourier
     print(f"frequencias de pico {xf[index]}")  # xf é o vetor das frequencias
@@ -82,12 +82,19 @@ def main():
                     print("achou")
                     if frequencia not in frequencias_desejadas:
                         frequencias_desejadas.append(frequencia) #adicionando frequencia de pico na lista de frequencias desejadas
-    print(f"frequencias de pico sem ruido {frequencias_desejadas}")
+
 
     # encontre na tabela duas frequencias proximas às frequencias de pico encontradas e descubra qual foi a tecla
     # print o valor tecla!!!
-    print(f"tecla {tabela_frequencia.index(frequencias_desejadas) + 1}")
+
     # Se acertou, parabens! Voce construiu um sistema DTMF
+    if len(frequencias_desejadas) == 2:
+        print(f"frequencias de pico sem ruido {frequencias_desejadas}")
+        print(f"tecla {tabela_frequencia.index(frequencias_desejadas) + 1}")
+    
+    else: 
+        print("nao foi possivel identificar a tecla")
+
 
     # Você pode tentar também identificar a tecla de um telefone real! Basta gravar o som emitido pelo seu celular ao pressionar uma tecla.
 
