@@ -11,13 +11,15 @@ void setup() {
   digitalWrite(clientPin, HIGH);
 }
 
-void meio_periodo(void)
-{
-for(int i =0; i< 1093;i++) { asm("NOP");}
+// tempo de um clock (T = 1/frequencia)
+// Tempo entre cada clock em segundos (T = 1/baudrate)
+// numero de clocks ((T/clock) + 1 )
+
+void meio_periodo(void){
+  for(int i =0; i< 1093;i++) { asm("NOP");}
 }
 
-void periodo(void)
-{
+void periodo(void){
   meio_periodo();
   meio_periodo();
  }
