@@ -1,13 +1,16 @@
-Baudrate = bits/s
+Baudrate = bits/s (Taxa de transmissão de dados)
+Clock = Hz (Frequência de atividade do processador)
+Frequencia = Hz = 1/s = 1/periodo
 
-conversão para bytes/s: 
-    1 byte = 8 bits -> bautrate/8 = bytes/s
-    Ex: baudrate = 9600 -> 9600/8 = 1200 bytes/s
+Conversões
+    conversão para bytes/s: 
+        1 byte = 8 bits -> bautrate/8 = bytes/s
+        Ex: baudrate = 9600 -> 9600/8 = 1200 bytes/s
 
-Bit duration = 1/baudrate = s/bit
-    Ex: baudrate = 9600 -> 1/9600 = 1.04e-4 s/bit = 104 us/bit
+    Bit duration = 1/baudrate = s/bit (quanto tempo demora para transmitir 1 bit)
+        Ex: baudrate = 9600 -> 1/9600 = 1.04e-4 s/bit = 104 us/bit
 
-1 clock = 1/clock do processador
+periodo do clock = 1/clock do processador
 numero de clocks = clock do processador/baudrate (projeto 6)
 
 para meio periodo: numero de clocks = clock do processador/(2*baudrate) (projeto 6)
