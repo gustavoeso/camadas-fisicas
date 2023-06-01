@@ -11,7 +11,7 @@ void setup() {
   digitalWrite(clientPin, HIGH);
 }
 
-// tempo de um clock (T = 1/frequencia)
+// tempo de um clock (clock = 1/frequencia)
 // Tempo entre cada clock em segundos (T = 1/baudrate)
 // numero de clocks ((T/clock) + 1 )
 

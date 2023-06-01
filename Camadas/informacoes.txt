@@ -6,3 +6,14 @@ conversão para bytes/s:
 
 Bit duration = 1/baudrate = s/bit
     Ex: baudrate = 9600 -> 1/9600 = 1.04e-4 s/bit = 104 us/bit
+
+1 clock = 1/clock do processador
+numero de clocks = clock do processador/baudrate (projeto 6)
+
+
+Tamanho arquivo de audio = delta_t * frequencia * resolução (em bits) * numero de canais
+    Ex: deta_t = 5 segundos
+        Canais = 1
+        Frequencia = 44100 Hz
+        Resolução = 20 bits
+        Tamanho = 5 * 44100 * 20 * 1 = 4410000 bits / 8 = 551250 bytes
