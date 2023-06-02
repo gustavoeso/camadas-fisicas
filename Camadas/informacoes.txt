@@ -1,6 +1,6 @@
 Baudrate = bits/s (Taxa de transmissão de dados)
 Clock = Hz (Frequência de atividade do processador)
-Frequencia = Hz = 1/s = 1/periodo
+Frequencia = Hz = 1/s = 1/periodo(T)
 
 Conversões
     conversão para bytes/s: 
@@ -10,21 +10,118 @@ Conversões
     Bit duration = 1/baudrate = s/bit (quanto tempo demora para transmitir 1 bit)
         Ex: baudrate = 9600 -> 1/9600 = 1.04e-4 s/bit = 104 us/bit
 
+
 periodo do clock = 1/clock do processador
 numero de clocks = clock do processador/baudrate (projeto 6)
 
 para meio periodo: numero de clocks = clock do processador/(2*baudrate) (projeto 6)
 
 
-Tamanho arquivo de audio = delta_t * frequencia * resolução (em bits) * numero de canais (projeto 7, 8)
+Tamanho arquivo de audio = delta_t (tempo de gravação) * frequencia (amostras gravadas por segundo) * resolução (bits por amostra)  * numero de canais (projeto 7, 8)
     Ex: deta_t = 5 segundos
         Canais = 1
         Frequencia = 44100 Hz
         Resolução = 20 bits
         Tamanho = 5 * 44100 * 20 * 1 = 4410000 bits / 8 = 551250 bytes
 
-frequencia da informação = w_sinal/2pi
+frequencia da informação = w_sinal/2pi - função da senoide
 banda_max = frequencia_da_portadora + frequencia_informacao
 banda_min = frequencia_da_portadora - frequencia_informacao
-range_banda = banda_min - banda_max
-denta_range = banda_max - banda_min
+range_banda = banda_min até banda_max
+delta_range = banda_max - banda_min
+
+quilobyte = 1024 bytes
+
+-----------------------------------------------------------------------------------------------------
+
+Ex1 - fotos (Cálculo do menor baudrate viável)
+
+taxa = 10.000 bytes/s
+payload = 200 bytes
+head = 10 bytes 
+EOP = 4 bytes
+
+p/ cada pacote:
++ 1 start bit 
++ 1 stop bit
+
+1. Primeiro passo (Calcular nº de pacotes por segundo)
+n_pacotes / segundo = 10.000 / 200 = 50 pacotes / segundo
+
+2. Tamanho do Pacote
+tamanho do pacote = payload + head + EOP = 200 + 10 + 4 = 214 bytes * 8 = 1712 bits + 2 bits (start e stop) = 1714 bits
+
+3. Cálculo do Baudrate
+baudrate (bit/s) = 1714 * 50 = 85700 bits/s
+
+-----------------------------------------------------------------------------------------------------
+
+Ex 2 - Correção de Código	
+
+Verifica-se o erro na linha 
+self.buffer = rx.Temp, sendo que deveria ser: self.buffer += rx.Temp
+
+Já que sem a incrementação do buffer, o mesmo é sobrescrito a cada iteração do loop, resultando em uma perda de dados do que ainda estava 
+armazenado no buffer.
+
+-----------------------------------------------------------------------------------------------------
+
+Ex 3 - Correção de Código
+
+Verifica-se o erro já que faltou:
+self.buffer = self.buffer[nData:], para que o buffer seja atualizado com os dados que ainda não foram enviados.
+
+-----------------------------------------------------------------------------------------------------
+
+Ex4 - Transmissão UART
+
+numero de pacotes = 38.500 / 128 = 300,78 pacotes (301 pacotes enviados - Aluno A e B)
+
+Aluno A - 
+300 pacotes cheios (128 bytes de payload + 10 bytes de head + 4 bytes de EOP) = 300 * 142 = 42.600 bytes
+1 pacote com 64 bytes de payload + 10 bytes de head + 4 bytes de EOP = 78 bytes
+Total = 42.600 + 78 = 42.678 bytes
+
+Aluno B -
+Mesmo overhead do aluno A pois envia a mesma quantidade de pacotes (301 pacotes)
+300-64 = 236 pacotes cheios (128 bytes de payload + 10 bytes de head + 4 bytes de EOP) = 236 * 142 = 33.512 bytes
+64 pacotes quase cheios (127 bytes de payload + 10 bytes de head + 4 bytes de EOP) = 64 * 141 = 9.024 bytes
+1 pacote com 128 bytes de payload + 10 bytes de head + 4 bytes de EOP = 142 bytes
+Total = 33.512 + 9.024 + 142 = 42.678 bytes
+
+A estratégia do Aluno A resultaria em uma transmissão feita em um menor tempo pois este aluno otimiza o uso do payload,
+enviando os pacotes cheios sempre que possível.
+
+Além disso, a estratégia do aluno B poderia resultar em uma ineficência de código dada a variação do tamanho do payload, o que dificulta a 
+receptação dos dados do arquivo por parte do servidor.
+
+
+-----------------------------------------------------------------------------------------------------
+
+Ex 5 - Modulação AM
+
+item a:
+taxa de amostragem = 44100 Hz ; resolução = 16 bits ; canais = 1 ; tempo de transmissão = 5 segundos
+tamanho do arquivo = 44100 * 16 * 1 * 5 = 3.528.000 bits = 441.000 bytes
+
+item b:
+agora para o tamanho do arquivo: nova taxa de amostragem = 48.000 Hz
+tempo de transmissão = tamanho do arquivo / (taxa de amostragem * resolução * canais) = 3.528.000 / (48.000 * 16 * 1) = 4,59375 segundos
+
+item c:
+No caso da taxa de amostragem ser menor que a taxa de amostragem do arquivo, mais amostras serão transmitidas por segundo, o que resulta em uma 
+frequencia de trasmissão mais alta, ou seja, um resultado de um áudio mais agudo.
+
+-----------------------------------------------------------------------------------------------------
+
+Ex 6 - Modulação AM
+Em relação a Modulação AM, primeiramente é passado um filtro passa baixa para deixar o áudio dentro do limite de transmissão desejado pela portadora.
+Após isso, multiplica-se o áudio pelo sinal da portadora, resultando em uma modulação AM (já com a frequência da portadora).
+
+Em relação a Demodulação AM, primeiramente é necessário multiplicar o sinal modulado pelo sinal da portadora, resultando no sinal original + sinal 
+modulado e apenas após esse processo é que se passa o sinal por um filtro passa baixa, resultando no sinal original novamente.
+
+Logo, no problema em questão, a ordem dos blocos da demodulação está invertida, o que faria que a trasmissão do áudio original não fosse completada,
+já que o filtro passa baixa cortaria o sinal modulado, resultando em um sinal vazio.
+
+Solução: Primeiro multiplicar o sinal modulado pela portadora e depois passar o sinal pelo filtro passa baixa.
